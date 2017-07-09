@@ -93,3 +93,16 @@ libevent_openssl.pc
 /test/test-weof
 /test/test-changelist
 
+# Added after Netatalk import of 2.1.18
+# no idea why we need them
+/libevent_core.pc
+/libevent_extra.pc
+/sample/.dirstamp
+/sample/event-read-fifo
+/sample/http-connect
+/sample/https-client
+/stamp-h2
+/test/.dirstamp
+/test/test-closed
+/test/test-dumpevents
+/test/test-fdleak
