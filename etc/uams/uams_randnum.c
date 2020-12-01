@@ -203,17 +203,17 @@ afppasswd_found:
 	key[j] = (unhex(key[i]) << 4) | unhex(key[i + 1]);
       if (j <= DES_KEY_SZ)
 	memset(key + j, 0, sizeof(key) - j);
-      DES_key_sched((DES_cblock *) key, schedule);
+      DES_key_sched((DES_cblock *) key, &schedule);
       memset(key, 0, sizeof(key));
 
       if (set) {
 	/* NOTE: this takes advantage of the fact that passwd doesn't
 	 *       get used after this call if it's being set. */
-	DES_ecb_encrypt((DES_cblock *) passwd, (DES_cblock *) passwd, schedule,
+	DES_ecb_encrypt((DES_cblock *) passwd, (DES_cblock *) passwd, &schedule,
 		    DES_ENCRYPT);
       } else {
 	/* decrypt the password */
-	DES_ecb_encrypt((DES_cblock *) p, (DES_cblock *) p, schedule, DES_DECRYPT);
+	DES_ecb_encrypt((DES_cblock *) p, (DES_cblock *) p, &schedule, DES_DECRYPT);
       }
       memset(&schedule, 0, sizeof(schedule));
   }
@@ -362,7 +362,7 @@ static int randnum_logincont(void *obj, struct passwd **uam_pwd,
 
   /* encrypt. this saves a little space by using the fact that
    * des can encrypt in-place without side-effects. */
-  DES_key_sched((DES_cblock *) seskey, seskeysched);
+  DES_key_sched((DES_cblock *) seskey, &seskeysched);
   memset(seskey, 0, sizeof(seskey));
   DES_ecb_encrypt((DES_cblock *) randbuf, (DES_cblock *) randbuf,
 	       seskeysched, DES_ENCRYPT);
@@ -406,10 +406,10 @@ static int rand2num_logincont(void *obj, struct passwd **uam_pwd,
     seskey[i] <<= 1;
 
   /* encrypt randbuf */
-  DES_key_sched((DES_cblock *) seskey, seskeysched);
+  DES_key_sched((DES_cblock *) seskey, &seskeysched);
   memset(seskey, 0, sizeof(seskey));
   DES_ecb_encrypt( (DES_cblock *) randbuf, (DES_cblock *) randbuf,
-	       seskeysched, DES_ENCRYPT);
+	       &seskeysched, DES_ENCRYPT);
 
   /* test against client's reply */
   if (memcmp(randbuf, ibuf, sizeof(randbuf))) { /* != */
@@ -422,7 +422,7 @@ static int rand2num_logincont(void *obj, struct passwd **uam_pwd,
 
   /* encrypt client's challenge and send back */
   DES_ecb_encrypt( (DES_cblock *) ibuf, (DES_cblock *) rbuf,
-	       seskeysched, DES_ENCRYPT);
+	       &seskeysched, DES_ENCRYPT);
   memset(&seskeysched, 0, sizeof(seskeysched));
   *rbuflen = sizeof(randbuf);
   
@@ -457,15 +457,15 @@ static int randnum_changepw(void *obj, const char *username _U_,
       return err;
 
     /* use old passwd to decrypt new passwd */
-    DES_key_sched((DES_cblock *) seskey, seskeysched);
+    DES_key_sched((DES_cblock *) seskey, &seskeysched);
     ibuf += PASSWDLEN; /* new passwd */
     ibuf[PASSWDLEN] = '\0';
-    DES_ecb_encrypt( (DES_cblock *) ibuf, (DES_cblock *) ibuf, seskeysched, DES_DECRYPT);
+    DES_ecb_encrypt( (DES_cblock *) ibuf, (DES_cblock *) ibuf, &seskeysched, DES_DECRYPT);
 
     /* now use new passwd to decrypt old passwd */
-    DES_key_sched((DES_cblock *) ibuf, seskeysched);
+    DES_key_sched((DES_cblock *) ibuf, &seskeysched);
     ibuf -= PASSWDLEN; /* old passwd */
-    DES_ecb_encrypt((DES_cblock *) ibuf, (DES_cblock *) ibuf, seskeysched, DES_DECRYPT);
+    DES_ecb_encrypt((DES_cblock *) ibuf, (DES_cblock *) ibuf, &seskeysched, DES_DECRYPT);
     if (memcmp(seskey, ibuf, sizeof(seskey))) 
 	err = AFPERR_NOTAUTH;
     else if (memcmp(seskey, ibuf + PASSWDLEN, sizeof(seskey)) == 0)
