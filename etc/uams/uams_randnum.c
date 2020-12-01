@@ -365,7 +365,7 @@ static int randnum_logincont(void *obj, struct passwd **uam_pwd,
   DES_key_sched((DES_cblock *) seskey, &seskeysched);
   memset(seskey, 0, sizeof(seskey));
   DES_ecb_encrypt((DES_cblock *) randbuf, (DES_cblock *) randbuf,
-	       seskeysched, DES_ENCRYPT);
+	       &seskeysched, DES_ENCRYPT);
   memset(&seskeysched, 0, sizeof(seskeysched));
 
   /* test against what the client sent */
