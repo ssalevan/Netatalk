@@ -145,8 +145,7 @@ static int pwd_login(void *obj, char *username, int ulen, struct passwd **uam_pw
     }
 
     /* generate key and make sure we have enough space */
-    dh->p = pbn;
-    dh->g = gbn;
+    DH_set0_pqg(dh, pbn, NULL, gbn);
     if (!DH_generate_key(dh) || (BN_num_bytes(dh->pub_key) > KEYSIZE)) {
       goto passwd_fail;
     }
